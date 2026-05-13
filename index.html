@@ -51,16 +51,15 @@
         <img src="images.jpeg" onerror="this.src='https://via.placeholder.com/60?text=LOGO'" class="logo-img">
         <div>
             <h1>PIBG SK ST. ANNE'S CONVENT</h1>
-            <span id="globalStatus" style="font-size: 11px; color: var(--green);">Sistem Aktif</span>
+            <span id="globalStatus" style="font-size: 11px; color: var(--gold);">Menyambung...</span>
         </div>
     </div>
 </div>
 
 <div class="grid">
-    <div class="card"><h3>Total Kutipan</h3><div class="value" id="statTotalAll">RM 0</div></div>
-    <div class="card"><h3>Kls Tambahan (RM70)</h3><div class="value" id="statTotalTambahan">RM 0</div></div>
-    <div class="card"><h3>PIBG (RM100)</h3><div class="value" id="statTotalPIBG">RM 0</div></div>
-    <div class="card"><h3>Selesai/Belum</h3><div class="value" id="statCountSummary">0 / 0</div></div>
+    <div class="card"><h3>Kutipan (RM)</h3><div class="value" id="statTotalAll">RM 0</div></div>
+    <div class="card"><h3>Syarat Selesai</h3><div class="value" style="font-size:12px; color:#21c87a">RM70 + (RM100/Kakak)</div></div>
+    <div class="card"><h3>Selesai / Belum</h3><div class="value" id="statCountSummary">0 / 0</div></div>
 </div>
 
 <div class="layout">
@@ -77,10 +76,10 @@
                 <thead>
                     <tr>
                         <th>Nama Murid</th>
-                        <th width="70">PIBG RM100</th>
-                        <th width="60">Pibg Kakak</th>
-                        <th width="70">Kls RM70</th>
-                        <th width="90">Tarikh</th>
+                        <th width="75">PIBG RM100</th>
+                        <th width="75">PIBG KAKAK</th>
+                        <th width="75">KLS RM70</th>
+                        <th width="95">Tarikh</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -100,9 +99,9 @@
 </div>
 
 <script>
+// PASTIKAN URL GOOGLE SCRIPT ANDA BETUL
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxok4tRLH8Y1R2b0yBYIdQlxfh-BkTmWHhUsIacKilZp8KnbknZl7WhD7IgB0nw6vwA/exec"; 
 
-// Data Tahun 1 - 6 (Disingkatkan untuk ruang, sila kekalkan data penuh anda)
 const PRELOADED_DATA = {
     "1 Daffodils": ["AAIRA SOPHEA BINTI HAZMEER", "AILEEN SURAIYA BINTI MUHAMMAD NURSYAHMI", "AYRA NADHIRAH BINTI ABDUL RAZAK", "DEANDRA ADELYA BINTI MOHD KAMARUL SHAHID", "DIVYA A/P KUMARAN", "FATHIMA SHAZNA BINTI MANSOOR KHAN", "IZA IZZARA BINTI IZAT IZZUDIN", "KAAVYASREE A/P SASIDARAN", "KHAYLA AFEEYA BINTI RAZMAN FAIZ", "LEYVINIAA JAHYAVIKNES SHAN", "NUR AAFIYAH BINTI MUHAMMAD HAKIIM", "NUR AALIYA ZAHRA BINTI MUHAMMAD MUIZZUDDIN", "NUR AIRIS SOFEA BINTI MOHAMAD YUHANIF", "NUR AISYAH ZAHIRAH BINTI MUHAMMAD AKMAL", "NUR AULIYA SAFFIYAH BINTI MUHAMMAD FITRIASHRAF", "NUR MARISSA BINTI MOHD FITRI", "NUR RAISHA ZAFIRAH BINTI PAHROLRAZI", "NUR ZAHIRA BINTI SYAROLRIZAL", "NUREEN MIKAYLA BINTI RUSDI AZIZ", "NURUL AMIRAH SOFIA BINTI ABDULLAH", "PUTERI BALQIS BINTI KAMALRULZAMAN", "PUTERI QAYRA AFIYA BINTI MOHD AMIRUL ANUAR", "QURRATUL UMNI HANIYYA BINTI MOHD RIDZUAN", "RAJA NELISSA BINTI RAJA HAZREN", "RAPHEALLA MOHAN", "RIZQ RUMAISA BINTI MOHD RIZAL", "RUMAISHA BINTI AB ZILJALALI WALIKRAM", "SAGISHNA A/P DINNAISH", "SHAMITA MOHAN GANES", "SITI NURHAFIZAH BINTI HELMI", "SITI SUHAILA SYAHIRAH BINTI MUHAMAD SAIFULIZAM", "SOFIA NUR AISHAH BINTI MOHD ZAMRIE", "SOFIA NUR ZULAIKHA BINTI MOHD ZAMRIE", "SREESHA NAIR A/P JANATHERAN NAIR", "YUSRIENA DELISHA BINTI MOHAMAD YUSOF", "ZIA AINUL MARDHIAH BINTI MOHD ZAIM"],
     "1 Camellia": ["AFIQAH BINTI HALIDZAN", "AL ZAHRA ROSE BINTI JEFRY", "AZZA ZINNIRAH BINTI MUHAMMAD ZARUL AZUANDI", "DHIA INARA BINTI MUHAMMAD ISHAM", "DHIA SOFEA AZZAHRA BINTI MOHD FAISAL", "DIAN SURFINA BINTI MOHD SAZALI", "HANAN INARA BINTI MOHD SHAHRIN", "HUZAIRAH FARZEEN BINTI MUHAMMAD HASHIM", "JAYASREE A/P SARAVANAN", "KAMAL EYDENE AMEENA BINTI KAMAL ARIFIN", "LENISHA A/P MUKKESH", "MALAIQA HUMAIRA BINTI ZULKIFLI", "MIA ZAREEN QHADIJAH BINTI KHAIRUL BAHARI", "NOR FARISHA NAURA BINTI MUHAMAD NOR FAKHRI", "NUR AATHIFAH MAWIYAH BINTI MOHD AZAHAR", "NUR HIDAYATUL HUSNA BINTI MUHAMMAD FIRDAUS", "NUR IMANI HUMAIRAH BINTI SHAHROL NIZAM", "NUR KHAIRIN AAFIYAH BINTI MUHAMMAD KAMAL", "NUR KHAWLAH ZINNIRAH BINTI HAIRUL RIZUAN", "NUR NAINA AMIRA AMSYAR BINTI UMAR AMSYAR SURESH", "NUR QASEH ELSABELLA BINTI ROSDI", "NUR QASIH MIKAYLA BINTI MOHD EFFENDY", "NUR RAISHA IRDINA BINTI MOHD.RIZUWAN", "NUR ZAFREENAH BINTI AHMAD", "NUR ZARRA SOFEA BINTI MOHD SAIDY", "NURUL AAFIYAH BINTI MUHAMMAD AZMI", "PUTRI NUR AISYAH ZAHRA BINTI MUHAMMAD ZUFPI", "QASEH DELISHA BINTI SYAHRIZAN", "SHAANELLE NAVYAA RAJ", "SITI AISYAH HUMAIRA BINTI MOHD HAIRY", "THIYALINI A/P THIAGU", "ZARYN AEESYA BINTI AMIR AIZAT"],
@@ -166,17 +165,17 @@ function render() {
     
     tbody.innerHTML = "";
     debtorList.innerHTML = "";
-    let totals = { all: 0, pibg: 0, kakakCount: 0, tambahan: 0, selesai: 0, belum: 0 };
+    let totals = { all: 0, pibg: 0, tambahan: 0, selesai: 0, belum: 0 };
     let debtors = [];
 
     studentDatabase.forEach((s, index) => {
-        // Logik Selesai: Jika bayar PIBG > 0 ATAU Bayar Tambahan > 0 ATAU Tick Kakak (nilai 1)
-        const isSelesai = (s.pibg > 0) || (s.tambahan > 0) || (s.kakak === 1);
+        // LOGIK SELESAI: Tambahan mesti 70 DAN (PIBG 100 ATAU Kakak Tick)
+        const isTambahanSelesai = (s.tambahan >= 70);
+        const isPIBGSelesai = (s.pibg >= 100 || s.kakak === 1);
+        const isSelesai = isTambahanSelesai && isPIBGSelesai;
 
         totals.all += (s.pibg + s.tambahan);
-        totals.tambahan += s.tambahan;
-        if(s.kakak === 1) totals.kakakCount++;
-
+        
         if (isSelesai) {
             totals.selesai++;
         } else {
@@ -199,8 +198,6 @@ function render() {
     });
 
     document.getElementById('statTotalAll').innerText = "RM " + totals.all;
-    document.getElementById('statTotalKakak').innerText = totals.kakakCount + " Murid";
-    document.getElementById('statTotalTambahan').innerText = "RM " + totals.tambahan;
     document.getElementById('statCountSummary').innerText = `${totals.selesai} / ${totals.belum}`;
     document.getElementById('debtorCount').innerText = debtors.length;
     
@@ -212,16 +209,17 @@ function render() {
 
 function toggleKakak(index, isChecked) {
     const val = isChecked ? 1 : 0;
-    studentDatabase[index].kakak = val; // Kemaskini lokal dulu
+    studentDatabase[index].kakak = val;
     autoSave(index, 'kakak', val);
 }
 
 async function autoSave(index, field, value) {
     const student = studentDatabase[index];
     student[field] = field === 'tarikh' ? value : Number(value);
-    render(); // Update UI serta-merta
+    render();
     
     document.getElementById('globalStatus').innerText = "☁️ Menyimpan...";
+    document.getElementById('globalStatus').style.color = "var(--gold)";
     try {
         await fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
@@ -229,6 +227,7 @@ async function autoSave(index, field, value) {
             body: JSON.stringify(student)
         });
         document.getElementById('globalStatus').innerText = "✅ Tersimpan";
+        document.getElementById('globalStatus').style.color = "var(--green)";
     } catch (e) {
         document.getElementById('globalStatus').innerText = "❌ Ralat Simpan";
     }
