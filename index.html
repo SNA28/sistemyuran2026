@@ -30,7 +30,7 @@
         th{background:#183a79;padding:12px;position:sticky;top:0;text-align:left;z-index:10}
         td{padding:8px;border-bottom:1px solid #ffffff10}
         
-        input[type="number"], input[type="date"]{background:#ffffff15;color:#fff;border:1px solid #ffffff30;padding:5px;border-radius:5px;width:100%;font-size:11px}
+        input[type="number"], input[type="date"], input[type="text"]{background:#ffffff15;color:#fff;border:1px solid #ffffff30;padding:5px;border-radius:5px;width:100%;font-size:11px}
         input:focus{outline:none; border-color:var(--gold)}
         
         .check-container { display: flex; justify-content: center; align-items: center; }
@@ -40,19 +40,28 @@
         .selesai { background: var(--green); color: #000; }
         .belum { background: var(--red); color: #fff; }
         
+        .btn { padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer; font-size: 10px; font-weight: bold; transition: 0.3s; text-transform: uppercase; }
+        .btn-reset { background: var(--red); color: white; }
+        .btn-csv { background: var(--gold); color: #000; margin-right: 5px; }
+        .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+
         .debtor-item { display: flex; justify-content: space-between; padding: 6px; border-bottom: 1px solid #fff1; font-size: 10px; }
-        @media (max-width: 850px) { .layout { grid-template-columns: 1fr; } }
+        @media (max-width: 850px) { .layout { grid-template-columns: 1fr; } .header { flex-direction: column; gap: 15px; text-align: center; } }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="brand">
-        <img src="images.jpeg" onerror="this.src='https://via.placeholder.com/60?text=LOGO'" class="logo-img">
+        <img src="https://i.ibb.co/3ykYpM6M/image.jpg" onerror="this.src='https://via.placeholder.com/60?text=LOGO'" class="logo-img">
         <div>
             <h1>PIBG SK ST. ANNE'S CONVENT</h1>
             <span id="globalStatus" style="font-size: 11px; color: var(--gold);">Menghubung...</span>
         </div>
+    </div>
+    <div class="admin-tools">
+        <button class="btn btn-csv" onclick="downloadCSV()">⬇️ Simpan CSV</button>
+        <button class="btn btn-reset" onclick="adminReset()">⚠️ Reset Data</button>
     </div>
 </div>
 
@@ -100,7 +109,9 @@
 </div>
 
 <script>
+// KONFIGURASI
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxok4tRLH8Y1R2b0yBYIdQlxfh-BkTmWHhUsIacKilZp8KnbknZl7WhD7IgB0nw6vwA/exec"; 
+const ADMIN_PASSWORD = "admin123"; // Tukar password di sini
 
 const PRELOADED_DATA = {
     "1 Daffodils": ["AAIRA SOPHEA BINTI HAZMEER", "AILEEN SURAIYA BINTI MUHAMMAD NURSYAHMI", "AYRA NADHIRAH BINTI ABDUL RAZAK", "DEANDRA ADELYA BINTI MOHD KAMARUL SHAHID", "DIVYA A/P KUMARAN", "FATHIMA SHAZNA BINTI MANSOOR KHAN", "IZA IZZARA BINTI IZAT IZZUDIN", "KAAVYASREE A/P SASIDARAN", "KHAYLA AFEEYA BINTI RAZMAN FAIZ", "LEYVINIAA JAHYAVIKNES SHAN", "NUR AAFIYAH BINTI MUHAMMAD HAKIIM", "NUR AALIYA ZAHRA BINTI MUHAMMAD MUIZZUDDIN", "NUR AIRIS SOFEA BINTI MOHAMAD YUHANIF", "NUR AISYAH ZAHIRAH BINTI MUHAMMAD AKMAL", "NUR AULIYA SAFFIYAH BINTI MUHAMMAD FITRIASHRAF", "NUR MARISSA BINTI MOHD FITRI", "NUR RAISHA ZAFIRAH BINTI PAHROLRAZI", "NUR ZAHIRA BINTI SYAROLRIZAL", "NUREEN MIKAYLA BINTI RUSDI AZIZ", "NURUL AMIRAH SOFIA BINTI ABDULLAH", "PUTERI BALQIS BINTI KAMALRULZAMAN", "PUTERI QAYRA AFIYA BINTI MOHD AMIRUL ANUAR", "QURRATUL UMNI HANIYYA BINTI MOHD RIDZUAN", "RAJA NELISSA BINTI RAJA HAZREN", "RAPHEALLA MOHAN", "RIZQ RUMAISA BINTI MOHD RIZAL", "RUMAISHA BINTI AB ZILJALALI WALIKRAM", "SAGISHNA A/P DINNAISH", "SHAMITA MOHAN GANES", "SITI NURHAFIZAH BINTI HELMI", "SITI SUHAILA SYAHIRAH BINTI MUHAMAD SAIFULIZAM", "SOFIA NUR AISHAH BINTI MOHD ZAMRIE", "SOFIA NUR ZULAIKHA BINTI MOHD ZAMRIE", "SREESHA NAIR A/P JANATHERAN NAIR", "YUSRIENA DELISHA BINTI MOHAMAD YUSOF", "ZIA AINUL MARDHIAH BINTI MOHD ZAIM"],
@@ -150,12 +161,17 @@ async function fetchAllData() {
                 studentDatabase[idx].tarikh = row.tarikh || "";
             }
         });
-        document.getElementById('globalStatus').innerText = "✅ Cloud Berhubung";
-        document.getElementById('globalStatus').style.color = "var(--green)";
+        updateStatus("✅ Cloud Berhubung", "var(--green)");
         render();
     } catch (e) {
-        document.getElementById('globalStatus').innerText = "⚠️ Mod Offline";
+        updateStatus("⚠️ Mod Offline", "var(--red)");
     }
+}
+
+function updateStatus(text, color) {
+    const el = document.getElementById('globalStatus');
+    el.innerText = text;
+    el.style.color = color;
 }
 
 function render() {
@@ -170,16 +186,14 @@ function render() {
     let debtors = [];
 
     studentDatabase.forEach((s, index) => {
-        // SYARAT SELESAI: Tambahan >= 70 DAN (PIBG >= 100 ATAU Kakak Ditanda)
         const isSelesai = (s.tambahan >= 70) && (s.pibg >= 100 || s.kakak === 1);
 
         stats.totalAll += (s.pibg + s.tambahan);
         stats.totalPIBG += s.pibg;
         stats.totalTambahan += s.tambahan;
 
-        if (isSelesai) {
-            stats.selesai++;
-        } else {
+        if (isSelesai) stats.selesai++; 
+        else {
             stats.belum++;
             debtors.push(s);
         }
@@ -204,7 +218,7 @@ function render() {
     document.getElementById('statCountSummary').innerText = `${stats.selesai} / ${stats.belum}`;
     document.getElementById('debtorCount').innerText = debtors.length;
     
-    debtors.forEach(d => {
+    debtors.slice(0, 100).forEach(d => {
         debtorList.innerHTML += `<div class="debtor-item"><span>${d.nama}</span><b>${d.kelas}</b></div>`;
     });
     updateChart(stats);
@@ -218,23 +232,62 @@ function toggleKakak(index, isChecked) {
 
 async function autoSave(index, field, value) {
     const student = studentDatabase[index];
-    student[field] = field === 'tarikh' ? value : Number(value);
+    student[field] = field === 'tarikh' ? value : (field === 'kakak' ? value : Number(value));
     render();
     
-    const statusText = document.getElementById('globalStatus');
-    statusText.innerText = "☁️ Menyimpan...";
-    statusText.style.color = "var(--gold)";
+    updateStatus("☁️ Menyimpan...", "var(--gold)");
     try {
         await fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
             mode: "no-cors",
-            body: JSON.stringify(student)
+            body: JSON.stringify({action: "update", data: student})
         });
-        statusText.innerText = "✅ Tersimpan";
-        statusText.style.color = "var(--green)";
+        updateStatus("✅ Tersimpan", "var(--green)");
     } catch (e) {
-        statusText.innerText = "❌ Ralat Simpan";
+        updateStatus("❌ Ralat Simpan", "var(--red)");
     }
+}
+
+// FUNGSI BARU: RESET DATA
+async function adminReset() {
+    const pw = prompt("Masukkan Kata Laluan Admin untuk RESET SEMUA DATA:");
+    if (pw === ADMIN_PASSWORD) {
+        if (confirm("ADAKAH ANDA PASTI? Semua rekod bayaran di Cloud akan dipadamkan!")) {
+            updateStatus("🗑️ Memadam...", "var(--red)");
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    body: JSON.stringify({action: "reset"})
+                });
+                alert("Semua data telah dipadam. Sistem akan dimulakan semula.");
+                location.reload();
+            } catch (e) {
+                alert("Ralat memadam data.");
+            }
+        }
+    } else if (pw !== null) {
+        alert("Kata laluan salah!");
+    }
+}
+
+// FUNGSI BARU: DOWNLOAD CSV
+function downloadCSV() {
+    let csv = "Nama Murid,Kelas,PIBG RM100,PIBG Kakak,KLS RM70,Tarikh,Status\n";
+    studentDatabase.forEach(s => {
+        const isSelesai = (s.tambahan >= 70) && (s.pibg >= 100 || s.kakak === 1) ? "SELESAI" : "BELUM";
+        csv += `"${s.nama}","${s.kelas}",${s.pibg},${s.kakak === 1 ? 'YA' : 'TIDAK'},${s.tambahan},"${s.tarikh}","${isSelesai}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Laporan_PIBG_2026_${new Date().toLocaleDateString()}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 function updateChart(stats) {
